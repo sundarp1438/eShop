@@ -50,7 +50,7 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
         // Act - 2
         var priorAvailableStock = itemToUpdate.AvailableStock;
         itemToUpdate.AvailableStock -= 1;
-        response = await _httpClient.PutAsJsonAsync("/api/catalog/items", itemToUpdate);
+        response = await _httpClient.PutAsJsonAsync("/api/catalog/items/1", itemToUpdate);
         response.EnsureSuccessStatusCode();
 
         // Act - 3
@@ -77,7 +77,7 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
         var priorAvailableStock = itemToUpdate.AvailableStock;
         itemToUpdate.AvailableStock -= 1;
         itemToUpdate.Price = 1.99m;
-        response = await _httpClient.PutAsJsonAsync("/api/catalog/items", itemToUpdate);
+        response = await _httpClient.PutAsJsonAsync("/api/catalog/items/1", itemToUpdate);
         response.EnsureSuccessStatusCode();
 
         // Act - 3
@@ -98,12 +98,12 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
         // Act
         var response = await _httpClient.GetAsync("/api/catalog/items/by?ids=1&ids=2&ids=3");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<List<CatalogItem>>(body, _jsonSerializerOptions);
 
-        // Assert 3 items      
+        // Assert 3 items
         Assert.Equal(3, result.Count);
     }
 
@@ -113,12 +113,12 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
         // Act
         var response = await _httpClient.GetAsync("/api/catalog/items/2");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<CatalogItem>(body, _jsonSerializerOptions);
 
-        // Assert       
+        // Assert
         Assert.Equal(2, result.Id);
         Assert.NotNull(result);
     }
@@ -127,9 +127,9 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
     public async Task GetCatalogItemWithExactName()
     {
         // Act
-        var response = await _httpClient.GetAsync("api/catalog/items/by/Wanderer%20Black%20Hiking%20Boots?PageSize=5&PageIndex=0");
+        var response = await _httpClient.GetAsync("api/catalog/items?name=Wanderer%20Black%20Hiking%20Boots&PageSize=5&PageIndex=0");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PaginatedItems<CatalogItem>>(body, _jsonSerializerOptions);
@@ -147,9 +147,9 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
     public async Task GetCatalogItemWithPartialName()
     {
        // Act
-       var response = await _httpClient.GetAsync("api/catalog/items/by/Alpine?PageSize=5&PageIndex=0");
+       var response = await _httpClient.GetAsync("api/catalog/items?name=Alpine&PageSize=5&PageIndex=0");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PaginatedItems<CatalogItem>>(body, _jsonSerializerOptions);
@@ -169,11 +169,11 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
         // Act
         var response = await _httpClient.GetAsync("api/catalog/items/1/pic");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var result = response.Content.Headers.ContentType.MediaType;
 
-        // Assert       
+        // Assert
         Assert.Equal("image/webp", result);
     }
 
@@ -182,14 +182,14 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
     public async Task GetCatalogItemWithsemanticrelevance()
     {
         // Act
-        var response = await _httpClient.GetAsync("api/catalog/items/withsemanticrelevance/Wanderer?PageSize=5&PageIndex=0");
+        var response = await _httpClient.GetAsync("api/catalog/items/withsemanticrelevance?text=Wanderer&PageSize=5&PageIndex=0");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PaginatedItems<CatalogItem>>(body, _jsonSerializerOptions);
 
-        // Assert       
+        // Assert
         Assert.Equal(1, result.Count);
         Assert.NotNull(result.Data);
         Assert.Equal(0, result.PageIndex);
@@ -200,14 +200,14 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
     public async Task GetCatalogItemWithTypeIdBrandId()
     {
         // Act
-        var response = await _httpClient.GetAsync("api/catalog/items/type/3/brand/3?PageSize=5&PageIndex=0");
+        var response = await _httpClient.GetAsync("api/catalog/items?type=3&brand=3&PageSize=5&PageIndex=0");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PaginatedItems<CatalogItem>>(body, _jsonSerializerOptions);
 
-        // Assert    
+        // Assert
         Assert.NotNull(result.Data);
         Assert.Equal(4, result.Count);
         Assert.Equal(0, result.PageIndex);
@@ -220,14 +220,14 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
     public async Task GetAllCatalogTypeItemWithBrandId()
     {
         // Act
-        var response = await _httpClient.GetAsync("api/catalog/items/type/all/brand/3?PageSize=5&PageIndex=0");
+        var response = await _httpClient.GetAsync("api/catalog/items?brand=3&PageSize=5&PageIndex=0");
 
         // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PaginatedItems<CatalogItem>>(body, _jsonSerializerOptions);
 
-        // Assert              
+        // Assert
         Assert.NotNull(result.Data);
         Assert.Equal(11, result.Count);
         Assert.Equal(0, result.PageIndex);
@@ -241,12 +241,12 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
         // Act
         var response = await _httpClient.GetAsync("api/catalog/catalogtypes");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<List<CatalogType>>(body, _jsonSerializerOptions);
 
-        // Assert       
+        // Assert
         Assert.Equal(8, result.Count);
         Assert.NotNull(result);
     }
@@ -257,12 +257,12 @@ public sealed class CatalogApiTests : IClassFixture<CatalogApiFixture>
         // Act
         var response = await _httpClient.GetAsync("api/catalog/catalogbrands");
 
-        // Arrange   
+        // Arrange
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<List<CatalogBrand>>(body, _jsonSerializerOptions);
 
-        // Assert       
+        // Assert
         Assert.Equal(13, result.Count);
         Assert.NotNull(result);
     }
